@@ -22,9 +22,10 @@
       --primary: #0d6efd;
       --dark: #212529;
       --muted: #6c757d;
+      --bg: #ffffff;
     }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Roboto', sans-serif; color: var(--dark); }
+    body { font-family: 'Roboto', sans-serif; color: var(--dark); background: var(--bg); }
     .navbar-brand h1 { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 0; }
     .bg-primary { background-color: var(--primary) !important; }
     .hero-img { width: 260px; max-width: 80%; transition: transform 0.5s; }
@@ -41,6 +42,39 @@
     footer a { text-decoration: none; }
     /* small responsive tweaks */
     @media (max-width: 767px) { .hero-img { margin-top: 30px; } }
+
+    /* Dark mode styles */
+    body.dark-mode {
+      --primary: #66a8ff;
+      --dark: #e9eef8;
+      --muted: #9aa4b0;
+      --bg: #0f1720;
+      background-color: var(--bg) !important;
+      color: var(--dark) !important;
+    }
+    body.dark-mode .navbar,
+    body.dark-mode .bg-light {
+      background-color: #0b1220 !important;
+      color: var(--dark) !important;
+    }
+    body.dark-mode .card,
+    body.dark-mode .form-control,
+    body.dark-mode .bg-secondary {
+      background-color: #0b1220 !important;
+      color: var(--dark) !important;
+      border-color: rgba(255,255,255,0.06) !important;
+    }
+    body.dark-mode .text-secondary { color: var(--muted) !important; }
+    body.dark-mode .lead { color: var(--muted) !important; }
+    body.dark-mode .btn-outline-dark { color: var(--dark); border-color: var(--dark); }
+    body.dark-mode .btn-outline-dark:hover { background: var(--dark); color: var(--bg); }
+    body.dark-mode .progress { background: rgba(255,255,255,0.03); }
+    body.dark-mode .progress .progress-bar { opacity: 0.98; }
+    body.dark-mode .badge { opacity: 0.95; }
+    body.dark-mode a { color: var(--primary); }
+
+    /* Small helper for accessible focus outline */
+    .focus-outline:focus { outline: 2px dashed rgba(13,110,253,.6); outline-offset: 3px; }
   </style>
 </head>
 <body data-spy="scroll" data-target=".navbar" data-offset="70">
@@ -63,7 +97,11 @@
           <a class="nav-item nav-link" href="#testimonial">Testimonials</a>
           <a class="nav-item nav-link" href="#contact">Contact</a>
         </div>
-        <a class="btn btn-outline-primary d-none d-lg-inline-block" href="https://www.linkedin.com/in/yash-gupta72003" target="_blank">Hire Me</a>
+        <a class="btn btn-outline-primary d-none d-lg-inline-block mr-2" href="https://www.linkedin.com/in/yash-gupta72003" target="_blank">Hire Me</a>
+        <!-- Dark Mode Toggle -->
+        <button id="darkModeToggle" class="btn btn-sm btn-outline-dark focus-outline" aria-label="Toggle dark mode" aria-pressed="false">
+          <i class="fas fa-moon"></i>
+        </button>
       </div>
     </div>
   </nav>
@@ -92,14 +130,11 @@
     </div>
   </header>
 
-  <!-- ABOUT -->
+  <!-- ABOUT (image removed) -->
   <section id="about" class="container-fluid py-5">
     <div class="container">
       <div class="row align-items-center">
-        <div class="col-lg-5 text-center mb-4 mb-lg-0 fade-in">
-          <img src="images/about.jpg" alt="Yash Gupta" class="img-fluid rounded shadow-lg border border-3 border-primary" style="max-width:320px;">
-        </div>
-        <div class="col-lg-7 fade-in">
+        <div class="col-lg-8 mx-auto fade-in text-center text-lg-left">
           <h2 class="display-5 font-weight-bold mb-2">About Me</h2>
           <h5 class="text-primary mb-3">MERN Stack Developer | Data Analytics Enthusiast | DSA Learner</h5>
           <p class="lead">
@@ -158,7 +193,6 @@
     </div>
   </section>
 
-  <!-- PROJECTS, EDUCATION, TESTIMONIALS, CONTACT, FOOTER sections are the same as above, all with class "fade-in" and "project-card"/"testimonial-card" for animations -->
   <!-- PROJECTS -->
   <section id="projects" class="container-fluid py-5">
     <div class="container">
@@ -189,7 +223,7 @@
         <!-- VitalityFolio -->
         <div class="col-lg-4 col-md-6 mb-4 project-card">
           <div class="card h-100 border-0">
-            <img src="images/vitalityfolio.png"class="card-img-top" alt="VitalityFolio">
+            <img src="images/vitalityfolio.png" class="card-img-top" alt="VitalityFolio">
             <div class="card-body">
               <h5 class="card-title">VitalityFolio</h5>
               <p class="card-text">Portfolio project showcasing full-stack skills with interactive UI and modern web features.</p>
@@ -360,7 +394,7 @@
     function animateProgress() {
       document.querySelectorAll('.progress-bar').forEach(bar => {
         const value = bar.getAttribute('aria-valuenow');
-        bar.style.width = value + '%';
+        if (value) bar.style.width = value + '%';
       });
     }
 
@@ -377,10 +411,42 @@
     window.addEventListener('scroll', () => { revealOnScroll(); animateProgress(); });
     window.addEventListener('load', () => { revealOnScroll(); animateProgress(); });
 
+    // Dark mode toggle with localStorage + accessibility
+    const darkToggle = document.getElementById('darkModeToggle');
+    function setDarkMode(isDark){
+      document.body.classList.toggle('dark-mode', !!isDark);
+      const icon = darkToggle.querySelector('i');
+      if(isDark){
+        icon.classList.remove('fa-moon'); icon.classList.add('fa-sun');
+        darkToggle.setAttribute('aria-pressed', 'true');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        icon.classList.remove('fa-sun'); icon.classList.add('fa-moon');
+        darkToggle.setAttribute('aria-pressed', 'false');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    // initialize theme from localStorage or prefers-color-scheme
+    (function(){
+      const saved = localStorage.getItem('theme');
+      if(saved === 'dark') return setDarkMode(true);
+      if(saved === 'light') return setDarkMode(false);
+      // fallback to system preference
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDarkMode(prefersDark);
+    })();
+
+    darkToggle.addEventListener('click', () => {
+      const isDark = document.body.classList.contains('dark-mode');
+      setDarkMode(!isDark);
+    });
   </script>
 
   <style>
-    /* Scroll fade-in animation */
+    /* Scroll fade-in animation (duplicate kept intentionally for quick local overrides) */
     .fade-in, .project-card, .testimonial-card { opacity:0; transform: translateY(30px); transition: all 0.8s ease-out; }
     .fade-in.visible, .project-card.visible, .testimonial-card.visible { opacity:1; transform: translateY(0); }
   </style>
+</body>
+</html>
